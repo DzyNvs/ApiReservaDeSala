@@ -3,8 +3,10 @@ from app.models.reserva_model import Reserva
 from database import db
 from app.controllers.reserva_controller import validar_turma
 
+# Define o blueprint com prefixo /reservas
 reservas_blueprint = Blueprint("reservas", __name__, url_prefix="/reservas")
 
+# Criar nova reserva
 @reservas_blueprint.route("/", methods=["POST"])
 def criar_reserva():
     dados = request.json
@@ -33,6 +35,7 @@ def criar_reserva():
 
     return jsonify({"mensagem": "Reserva criada com sucesso"}), 201
 
+# Listar todas as reservas
 @reservas_blueprint.route("/", methods=["GET"])
 def listar_reservas():
     reservas = Reserva.query.all()
@@ -46,3 +49,34 @@ def listar_reservas():
             "hora_fim": r.hora_fim
         } for r in reservas
     ])
+
+# Atualizar uma reserva
+@reservas_blueprint.route("/<int:id>", methods=["PUT"])
+def atualizar_reserva(id):
+    reserva = Reserva.query.get(id)
+
+    if not reserva:
+        return jsonify({"erro": "Reserva não encontrada"}), 404
+
+    dados = request.json
+    reserva.sala = dados.get("sala", reserva.sala)
+    reserva.data = dados.get("data", reserva.data)
+    reserva.hora_inicio = dados.get("hora_inicio", reserva.hora_inicio)
+    reserva.hora_fim = dados.get("hora_fim", reserva.hora_fim)
+
+    db.session.commit()
+
+    return jsonify({"mensagem": "Reserva atualizada com sucesso"})
+
+# (Opcional) Deletar uma reserva
+@reservas_blueprint.route("/<int:id>", methods=["DELETE"])
+def deletar_reserva(id):
+    reserva = Reserva.query.get(id)
+
+    if not reserva:
+        return jsonify({"erro": "Reserva não encontrada"}), 404
+
+    db.session.delete(reserva)
+    db.session.commit()
+
+    return jsonify({"mensagem": "Reserva deletada com sucesso"})
