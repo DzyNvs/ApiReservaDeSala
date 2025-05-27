@@ -1,16 +1,27 @@
 from flask import Flask
+from flask_cors import CORS
 from database import db
-from reserva_route import routes
+from app.routes.reserva_route import reservas_blueprint  # nome correto do blueprint importado
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///reservas.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+def create_app():
+    app = Flask(__name__)
+    CORS(app)
 
-db.init_app(app)
-app.register_blueprint(routes)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///reservas.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-with app.app_context():
-    db.create_all()
+    db.init_app(app)
 
-if __name__ == "__main__":
-    app.run(port=5001, debug=True)
+    # Registra o blueprint com o prefixo correto
+    app.register_blueprint(reservas_blueprint, url_prefix="/api/reservas")
+
+    print(app.url_map)
+
+    with app.app_context():
+        db.create_all()
+
+    return app
+
+if __name__ == '__main__':
+    app = create_app()
+    app.run(debug=True, port=5001)

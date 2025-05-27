@@ -1,29 +1,31 @@
 from flask import Blueprint, request, jsonify
-from reserva_model import Reserva
+from app.models.reserva_model import Reserva
 from database import db
-import requests
+from app.controllers.reserva_controller import validar_turma
 
-routes = Blueprint("routes", __name__)
+reservas_blueprint = Blueprint("reservas", __name__, url_prefix="/reservas")
 
-
-def validar_turma(turma_id):
-    resp = requests.get(f"http://localhost:5000/api/turmas/{turma_id}")
-    return resp.status_code == 200
-
-@routes.route("/reservas", methods=["POST"])
+@reservas_blueprint.route("/", methods=["POST"])
 def criar_reserva():
     dados = request.json
     turma_id = dados.get("turma_id")
+    sala = dados.get("sala")
+    data = dados.get("data")
+    hora_inicio = dados.get("hora_inicio")
+    hora_fim = dados.get("hora_fim")
+
+    if not all([turma_id, sala, data, hora_inicio, hora_fim]):
+        return jsonify({"erro": "Todos os campos são obrigatórios"}), 400
 
     if not validar_turma(turma_id):
         return jsonify({"erro": "Turma não encontrada"}), 400
 
     reserva = Reserva(
         turma_id=turma_id,
-        sala=dados.get("sala"),
-        data=dados.get("data"),
-        hora_inicio=dados.get("hora_inicio"),
-        hora_fim=dados.get("hora_fim")
+        sala=sala,
+        data=data,
+        hora_inicio=hora_inicio,
+        hora_fim=hora_fim
     )
 
     db.session.add(reserva)
@@ -31,7 +33,7 @@ def criar_reserva():
 
     return jsonify({"mensagem": "Reserva criada com sucesso"}), 201
 
-@routes.route("/reservas", methods=["GET"])
+@reservas_blueprint.route("/", methods=["GET"])
 def listar_reservas():
     reservas = Reserva.query.all()
     return jsonify([
