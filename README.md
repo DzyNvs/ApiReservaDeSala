@@ -29,8 +29,7 @@ A API de Reserva de Salas é um **microsserviço** que faz parte de um sistema m
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/reserva-salas.git
-cd reserva-salas
+git clone https://github.com/DzyNvs/ApiReservaDeSala.git
 ```
 
 ### 2. Crie um ambiente virtual (opcional, mas recomendado)
@@ -97,13 +96,16 @@ E que os endpoints de `GET /turmas/<id>` (e opcionalmente `GET /alunos/<id>`) es
 ## 📦 Estrutura do Projeto
 
 ```
-reserva-salas/
-│
+
 ├── app.py
-├── reserva_model.py
 ├── database.py
-├── routes.py
-├── requirements.txt
+├────app/
+├──── models/
+├──────reserva_model.py
+├────routes/
+├──────reserva_route.py
+├────controller/
+├──────reserva.controller.py
 └── README.md
 ```
 
@@ -115,8 +117,4 @@ reserva-salas/
 - Integração via fila (RabbitMQ) com outros microsserviços
 - Autenticação de usuários
 
----
 
-## 🧑‍💻 Autor
-
-Caio Ireno – Projeto educativo de arquitetura com Flask e microsserviços.
